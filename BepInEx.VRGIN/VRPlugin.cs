@@ -1,36 +1,77 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Xml.Serialization;
-using BepInEx;
-using BepInEx.VRGIN.Core;
-using HarmonyLib;
-using UnityEngine;
 using VRGIN.Core;
 using VRGIN.Helpers;
-using Debug = UnityEngine.Debug;
 
 namespace BepInEx.VRGIN
 {
-    [BepInPlugin(VRCore.ModGuid, "BepInEx VRGIN Loader", VRCore.Version)]
-    [BepInDependency(VRCore.ModGuid_Core)] // context provider core module
-    [BepInDependency(VRCore.ModGuid_Context)] // per-game-defined context module
-    public class VRPlugin : BaseUnityPlugin
+    public abstract class VRPlugin : BaseUnityPlugin
     {
-        public static bool Active => !Environment.CommandLine.Contains("--novr") && (Environment.CommandLine.Contains("--vr") || SteamVRDetector.IsRunning);
         public static VRPlugin Instance;
-        public IVRManagerContext Context;
+        public VRSettings Settings;
         public VRManager Manager;
+        public IVRManagerContext Context;
 
-        public VRPlugin() => Instance = this;
+        public VRPlugin()
+        {
+            Instance = this;
+        }
+
+        public static bool Active => !Environment.CommandLine.Contains("--novr") &&
+                                     (Environment.CommandLine.Contains("--vr") || SteamVRDetector.IsRunning);
 
         private void Awake()
         {
             if (Active)
             {
-                Context = VRCore.LoadVrContext();
-                Manager = VRCore.GameInterpreterFactory(Context);
+                var pathPrefix = GetPathPrefix();
+                Settings = VRSettings.Load<VRSettings>(Path.Combine(pathPrefix, "VRSettings.xml"));
+                Context = CreateContext(Path.Combine(pathPrefix, "VRContext.xml"));
+                Manager = CreateVRManager(Context);
             }
         }
+
+        private IVRManagerContext CreateContext(string path)
+        {
+            var vrContextType = GetVrContextType();
+            var serializer = new XmlSerializer(vrContextType);
+
+            if (File.Exists(path))
+                // Attempt to load XML
+                using (var file = File.OpenRead(path))
+                {
+                    try
+                    {
+                        return serializer.Deserialize(file) as IVRManagerContext;
+                    }
+                    catch (Exception e)
+                    {
+                        VRLog.Error("Failed to deserialize {0} -- using default", path, e);
+                    }
+                }
+
+            // Create and save file
+            var context = vrContextType.GetConstructor(new[] { typeof(VRSettings) })
+                ?.Invoke(new object[] { Settings }) as IVRManagerContext;
+            try
+            {
+                using (var file = new StreamWriter(path))
+                {
+                    file.BaseStream.SetLength(0);
+                    serializer.Serialize(file, context);
+                }
+            }
+            catch (Exception e)
+            {
+                VRLog.Error("Failed to write {0}", path, e);
+            }
+
+            return context;
+        }
+
+        public abstract Type GetVrContextType();
+        public abstract string GetPathPrefix();
+        public abstract VRManager CreateVRManager(IVRManagerContext ctx);
     }
 }
