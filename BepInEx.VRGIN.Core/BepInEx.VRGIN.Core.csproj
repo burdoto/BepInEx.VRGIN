@@ -6,22 +6,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\VRGIN\VRGIN\VRGIN.csproj" />
-      <ProjectReference Include="..\BepInEx.VRGIN.Core\BepInEx.VRGIN.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="0Harmony, Version=2.4.2.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\Users\burdo\AppData\Roaming\r2modmanPlus-local\DysonSphereProgram\profiles\Default\BepInEx\core\0Harmony.dll</HintPath>
-      </Reference>
-      <Reference Include="BepInEx, Version=5.4.11.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\Users\burdo\AppData\Roaming\r2modmanPlus-local\DysonSphereProgram\profiles\Default\BepInEx\core\BepInEx.dll</HintPath>
-      </Reference>
-      <Reference Include="BepInEx.Harmony, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\Users\burdo\AppData\Roaming\r2modmanPlus-local\DysonSphereProgram\profiles\Default\BepInEx\core\BepInEx.Harmony.dll</HintPath>
-      </Reference>
-      <Reference Include="BepInEx.Preloader, Version=5.4.11.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\..\..\Users\burdo\AppData\Roaming\r2modmanPlus-local\DysonSphereProgram\profiles\Default\BepInEx\core\BepInEx.Preloader.dll</HintPath>
-      </Reference>
       <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Dyson Sphere Program\DSPGAME_Data\Managed\UnityEngine.dll</HintPath>
       </Reference>
