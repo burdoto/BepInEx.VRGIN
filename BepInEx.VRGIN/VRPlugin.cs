@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Xml.Serialization;
+using UnityEngine;
 using VRGIN.Core;
 using VRGIN.Helpers;
+using VRGIN.Visuals;
 
 namespace BepInEx.VRGIN
 {
@@ -34,8 +36,7 @@ namespace BepInEx.VRGIN
 
         private IVRManagerContext CreateContext(string path)
         {
-            var vrContextType = GetVrContextType();
-            var serializer = new XmlSerializer(vrContextType);
+            var serializer = new XmlSerializer(typeof(DefaultContext));
 
             if (File.Exists(path))
                 // Attempt to load XML
@@ -52,8 +53,7 @@ namespace BepInEx.VRGIN
                 }
 
             // Create and save file
-            var context = vrContextType.GetConstructor(new[] { typeof(VRSettings) })
-                ?.Invoke(new object[] { Settings }) as IVRManagerContext;
+            var context = CreateVRContext();
             try
             {
                 using (var file = new StreamWriter(path))
@@ -70,8 +70,30 @@ namespace BepInEx.VRGIN
             return context;
         }
 
-        public abstract Type GetVrContextType();
+        public abstract IVRManagerContext CreateVRContext();
         public abstract string GetPathPrefix();
         public abstract VRManager CreateVRManager(IVRManagerContext ctx);
+    }
+
+    public sealed class DefaultContext : IVRManagerContext
+    {
+        public string GuiLayer { get; }
+        public string UILayer { get; }
+        public int UILayerMask { get; }
+        public int IgnoreMask { get; }
+        public Color PrimaryColor { get; }
+        public IMaterialPalette Materials { get; }
+        public VRSettings Settings { get; }
+        public string InvisibleLayer { get; }
+        public bool SimulateCursor { get; }
+        public bool GUIAlternativeSortingMode { get; }
+        public Type VoiceCommandType { get; }
+        public float GuiNearClipPlane { get; }
+        public float GuiFarClipPlane { get; }
+        public float NearClipPlane { get; }
+        public float UnitToMeter { get; }
+        public bool EnforceDefaultGUIMaterials { get; }
+        public bool ConfineMouse { get; }
+        public GUIType PreferredGUI { get; }
     }
 }
