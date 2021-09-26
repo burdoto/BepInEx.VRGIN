@@ -7,6 +7,7 @@ using BepInEx.VRGIN.Core;
 using HarmonyLib;
 using UnityEngine;
 using VRGIN.Core;
+using VRGIN.Helpers;
 using Debug = UnityEngine.Debug;
 
 namespace BepInEx.VRGIN
@@ -16,45 +17,20 @@ namespace BepInEx.VRGIN
     [BepInDependency(VRCore.ModGuid_Context)] // per-game-defined context module
     public class VRPlugin : BaseUnityPlugin
     {
+        public static bool Active => !Environment.CommandLine.Contains("--novr") && (Environment.CommandLine.Contains("--vr") || SteamVRDetector.IsRunning);
+        public static VRPlugin Instance;
+        public IVRManagerContext Context;
+        public VRManager Manager;
+
+        public VRPlugin() => Instance = this;
+
         private void Awake()
         {
-        }
-        
-        private IVRManagerContext CreateContext(string path) {
-            var serializer = new XmlSerializer(VRCore.VrContextType);
-
-            if(File.Exists(path))
+            if (Active)
             {
-                // Attempt to load XML
-                using (var file = File.OpenRead(path))
-                {
-                    try
-                    {
-                        return serializer.Deserialize(file) as IVRManagerContext;
-                    }
-                    catch (Exception e)
-                    {
-                        VRLog.Error("Failed to deserialize {0} -- using default", path);
-                    }
-                }
+                Context = VRCore.LoadVrContext();
+                Manager = VRCore.GameInterpreterFactory(Context);
             }
-
-            // Create and save file
-            var context = VRCore.VrContextType.GetConstructor(Type.EmptyTypes)
-                ?.Invoke(Array.Empty<object>()) as IVRManagerContext;
-            try
-            {
-                using (var file = new StreamWriter(path))
-                {
-                    file.BaseStream.SetLength(0);
-                    serializer.Serialize(file, context);
-                }
-            } catch(Exception e)
-            {
-                VRLog.Error("Failed to write {0}", path);
-            }
-
-            return context;
         }
     }
 }
