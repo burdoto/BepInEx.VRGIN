@@ -34,7 +34,7 @@ namespace BepInEx.VRGIN.Core
                     }
                     catch (Exception e)
                     {
-                        VRLog.Error("Failed to deserialize {0} -- using default", path);
+                        VRLog.Error("Failed to deserialize {0} -- using default", path, e);
                     }
                 }
             }
@@ -51,7 +51,7 @@ namespace BepInEx.VRGIN.Core
                 }
             } catch(Exception e)
             {
-                VRLog.Error("Failed to write {0}", path);
+                VRLog.Error("Failed to write {0}", path, e);
             }
 
             return context;
